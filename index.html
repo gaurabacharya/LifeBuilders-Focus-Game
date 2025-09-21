@@ -1,0 +1,190 @@
+<!-- <!doctype html> 
+<html lang="en"> 
+    <head> 
+        <meta charset="UTF-8" />
+        <title>ADHD Focus Game</title>
+        <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+        <style type="text/css">
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="src/main.js"></script>
+    </body>
+</html> -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Focus Game Start Menu</title>
+  <style>
+    /* Calm, high-contrast palette; minimal visual noise */
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --panel: #111827;     /* gray-900 */
+      --accent: #38bdf8;    /* sky-400 */
+      --accent-2: #f59e0b;  /* amber-500 */
+      --text: #e5e7eb;      /* gray-200 */
+      --muted: #94a3b8;     /* slate-400 */
+    }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    #game-container { width: 100%; height: 100%; }
+
+    /* Optional: custom focus ring for keyboard nav */
+    .kbd-focus:focus { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+    /* Fallback overlay instructions while loading */
+    #loading {
+      position: fixed; inset: 0; display: grid; place-items: center;
+      background: var(--bg); color: var(--muted);
+      font-size: 1rem; letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading…</div>
+  <div id="game-container"></div>
+
+  <!-- Phaser 3 (latest) CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <script>
+    // --- BootScene -----------------------------------------------------------
+    class BootScene extends Phaser.Scene {
+      constructor(){ super('Boot'); }
+      preload(){
+        // Preload any assets here (fonts, audio, sprites). Keeping it text-only for now.
+      }
+      create(){
+        this.scene.start('Menu');
+
+      }
+    }
+
+    // --- MenuScene: Simple, low-stimulus start screen -----------------------
+    class MenuScene extends Phaser.Scene {
+      constructor(){ super('Menu'); }
+
+      preload() {
+        this.load.image('menu', 'assets/menu.png');
+      }
+      create(){
+        const { width, height } = this.scale;
+        // this.cameras.main.setBackgroundColor('#FFCCFE');
+        this.add.image(455, 270, 'menu');
+
+        // Title
+        this.add.text(width/2, height*0.20, 'Hi Arshia', {
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '56px',
+          fontStyle: '700',
+          color: '#FFCCFE'
+        }).setOrigin(0.5);
+
+        // Subtitle / tip
+        this.add.text(width/2, height*0.28, 'Welcome Back to LifeBuilders!', {
+          fontSize: '16px', color: '#FFCCFE'
+        }).setOrigin(0.5);
+
+        // Button helper
+        const makeButton = (label, y, onClick, opts={}) => {
+          const w = 220, h = 34;
+          const x = width/2 - w/2;
+          const btn = this.add.rectangle(x, y, w, h, 0xFFCCFE).setOrigin(0,0).setStrokeStyle(2, 0x18bdf8);
+          const txt = this.add.text(x + w/2, y + h/2, label, { fontSize: '16px', color: '#FFFFFF' }).setOrigin(0.5);
+          btn.setInteractive({ useHandCursor: true })
+            .on('pointerover', () => btn.setStrokeStyle(3, 0xf59e0b))
+            .on('pointerout',  () => btn.setStrokeStyle(2, 0x38bdf8))
+            .on('pointerdown', () => { onClick(); });
+          // Keyboard support: tab to focus-like area
+          btn.on('gameobjectover', () => {});
+          return { btn, txt };
+        };
+
+        // 1) Start Game (first option)
+        makeButton('Start Game', height*0.38, () => this.scene.start('Game'));
+
+        // 2) Calm Start (3-minute)
+        makeButton('Calm Start (3 min)', height*0.38 + 42, () => this.scene.start('Game', { mode: 'calm' }));
+
+        // 3) Settings (optional stub)
+        makeButton('Settings', height*0.38 + 84, () => this.scene.start('Settings'));
+
+        // Quick instructions (reduced cognitive load)
+        this.add.text(width/2, height*0.96, 'Enter/Space to Start • Esc to Pause • M to Mute', {
+          fontSize: '16px', color: '#000000'
+        }).setOrigin(0.5);
+
+        // Keyboard shortcuts
+        this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Game'));
+        this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Game'));
+      }
+    }
+
+    // --- Settings (stub) ----------------------------------------------------
+    class SettingsScene extends Phaser.Scene {
+      constructor(){ super('Settings'); }
+      create(){
+        const { width, height } = this.scale;
+        this.cameras.main.setBackgroundColor('#0f172a');
+        this.add.text(width/2, height*0.25, 'Settings', { fontSize: '42px', color: '#e5e7eb' }).setOrigin(0.5);
+        this.add.text(width/2, height*0.4, '• Toggle music/sounds\n• Choose session length\n• Reduce animations', { fontSize: '20px', color: '#94a3b8', align: 'center' }).setOrigin(0.5);
+        const back = this.add.text(width/2, height*0.8, '← Back to Menu (Esc)', { fontSize: '20px', color: '#38bdf8' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        back.on('pointerdown', ()=> this.scene.start('Menu'));
+        this.input.keyboard.on('keydown-ESC', ()=> this.scene.start('Menu'));
+      }
+    }
+
+    // --- GameScene (placeholder) -------------------------------------------
+    class GameScene extends Phaser.Scene {
+      constructor(){ super('Game'); }
+      init(data){ this.mode = data?.mode || 'normal'; }
+      create(){
+        const { width, height } = this.scale;
+        this.cameras.main.setBackgroundColor('#0b1023');
+
+        this.add.text(width/2, height*0.3, 'Session Running', { fontSize: '42px', color: '#e5e7eb' }).setOrigin(0.5);
+        this.add.text(width/2, height*0.43, `Mode: ${this.mode}`, { fontSize: '20px', color: '#94a3b8' }).setOrigin(0.5);
+        this.add.text(width/2, height*0.55, 'TODO: add your focus task here (e.g., tap targets, simple pacing).', { fontSize: '18px', color: '#94a3b8', align: 'center', wordWrap: { width: width*0.8 } }).setOrigin(0.5);
+
+        // Pause / Return to Menu
+        const hint = this.add.text(width/2, height*0.9, 'Esc = Pause / Menu', { fontSize: '16px', color: '#38bdf8' }).setOrigin(0.5);
+        this.input.keyboard.on('keydown-ESC', () => this.scene.start('Menu'));
+      }
+    }
+
+    // --- Game Config --------------------------------------------------------
+    const config = {
+      type: Phaser.AUTO,
+      parent: 'game-container',
+      backgroundColor: '#0f172a',
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 960,
+        height: 540
+      },
+      scene: [BootScene, MenuScene, GameScene, SettingsScene],
+      physics: { default: 'arcade', arcade: { debug: false } },
+      audio: { disableWebAudio: false }
+    };
+
+    const game = new Phaser.Game(config);
+
+    // Remove loading overlay once Phaser kicks in
+    window.addEventListener('load', () => {
+      const el = document.getElementById('loading');
+      if (el) el.remove();
+    });
+  </script>
+</body>
+</html>
+
