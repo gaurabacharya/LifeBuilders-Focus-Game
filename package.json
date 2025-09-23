@@ -1,0 +1,25 @@
+{
+  "name": "adhd-focus-game",
+  "version": "1.0.0",
+  "description": "A way to gameify studying to help with focus",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaurabacharya/LifeBuilders-Focus-Game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gaurabacharya/LifeBuilders-Focus-Game/issues"
+  },
+  "homepage": "https://github.com/gaurabacharya/LifeBuilders-Focus-Game#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
