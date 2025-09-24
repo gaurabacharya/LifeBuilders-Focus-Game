@@ -64,10 +64,91 @@
         // Preload any assets here (fonts, audio, sprites). Keeping it text-only for now.
       }
       create(){
-        this.scene.start('Menu');
+        this.scene.start('Bobbing');
 
       }
     }
+
+    class BobbingScene extends Phaser.Scene {
+  constructor() { super('Bobbing'); }
+
+  preload() {
+    // ⬇️ Replace these with your real assets
+    this.load.image('bg', 'assets/bootup.png');
+    this.load.image('imgA', 'assets/arshia.png');
+    this.load.image('imgB', 'assets/gaurab.png');
+  }
+
+  create() {
+    const { width, height } = this.scale;
+
+    // --- Background (cover) ---
+    this.bg = this.add.image(width/2, height/2, 'bg').setOrigin(0.5);
+    this.fitCover(this.bg, width, height);
+
+    this.add.text(width/2, height*0.20, 'Happy 25 Months Arshia!', {
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      fontSize: '56px',
+      fontStyle: '700',
+      color: '#FFCCFE'
+    }).setOrigin(0.5);
+
+    this.add.text(width/2, height*0.28, 'I love you so so so much!', {
+          fontSize: '16px', color: '#FFCCFE'
+        }).setOrigin(0.5);
+
+
+    // --- Foreground images ---
+    const baseY = height * 0.65;
+    this.a = this.add.image(width * 0.4, baseY, 'imgA').setOrigin(0.5);
+    this.b = this.add.image(width * 0.6, baseY, 'imgB').setOrigin(0.5);
+    this.a.setScale(0.2)
+    this.b.setScale(0.2)
+
+    // Bob amplitude (pixels) and timing
+    const AMP = 24;         // how far up/down
+    const STEP = 1000;      // 1 second per “half-cycle”
+
+    // A: up in 1s, down in 1s, loop
+    this.tweens.add({
+      targets: this.a,
+      y: baseY - AMP,
+      duration: STEP,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1
+    });
+
+    // B: same bob, phase-shifted by 0.5s so they alternate
+    this.tweens.add({
+      targets: this.b,
+      y: baseY - AMP,
+      duration: STEP,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1,
+      delay: STEP / 2
+    });
+
+    // Keep background covered on resize
+    this.scale.on('resize', (gs) => {
+      this.fitCover(this.bg, gs.width, gs.height);
+      // Recenter foregrounds if you want them responsive:
+      const baseY2 = gs.height * 0.65;
+      this.a.setPosition(gs.width * 0.4, baseY2);
+      this.b.setPosition(gs.width * 0.6, baseY2);
+    });
+
+    const hint = this.add.text(width/2, height*0.9, 'SPACE = Menu', { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
+    this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Menu'));
+  }
+
+  // --- Utility: scale image to "cover" the screen like CSS background-size: cover ---
+  fitCover(image, w, h) {
+    const scale = Math.max(w / image.width, h / image.height);
+    image.setScale(scale).setPosition(w/2, h/2);
+  }
+}
 
     // --- MenuScene: Simple, low-stimulus start screen -----------------------
     class MenuScene extends Phaser.Scene {
@@ -75,12 +156,12 @@
 
       preload() {
         this.load.image('menu', 'assets/menu.png');
+        this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
       }
       create(){
         const { width, height } = this.scale;
         // this.cameras.main.setBackgroundColor('#FFCCFE');
         this.add.image(455, 270, 'menu');
-
         // Title
         this.add.text(width/2, height*0.20, 'Hi Arshia', {
           fontFamily: 'Arial, Helvetica, sans-serif',
@@ -147,19 +228,127 @@
     class GameScene extends Phaser.Scene {
       constructor(){ super('Game'); }
       init(data){ this.mode = data?.mode || 'normal'; }
+
+      preload() {
+        this.load.spritesheet('dreamhouse', 'assets/platform.png', {
+        frameWidth: 64, frameHeight: 64
+      });
+        this.load.spritesheet('character', 'assets/dude.png', {
+        frameWidth: 32, frameHeight: 48
+      });
+      this.load.image('menu', 'assets/menu.png');
+      }
       create(){
         const { width, height } = this.scale;
-        this.cameras.main.setBackgroundColor('#0b1023');
+        // this.cameras.main.setBackgroundColor('#0b1023');
 
-        this.add.text(width/2, height*0.3, 'Session Running', { fontSize: '42px', color: '#e5e7eb' }).setOrigin(0.5);
-        this.add.text(width/2, height*0.43, `Mode: ${this.mode}`, { fontSize: '20px', color: '#94a3b8' }).setOrigin(0.5);
-        this.add.text(width/2, height*0.55, 'TODO: add your focus task here (e.g., tap targets, simple pacing).', { fontSize: '18px', color: '#94a3b8', align: 'center', wordWrap: { width: width*0.8 } }).setOrigin(0.5);
+        // this.add.text(width/2, height*0.3, 'Session Running', { fontSize: '42px', color: '#e5e7eb' }).setOrigin(0.5);
+        // this.add.text(width/2, height*0.43, `Mode: ${this.mode}`, { fontSize: '20px', color: '#94a3b8' }).setOrigin(0.5);
+        // this.add.text(width/2, height*0.55, 'TODO: add your focus task here (e.g., tap targets, simple pacing).', { fontSize: '18px', color: '#94a3b8', align: 'center', wordWrap: { width: width*0.8 } }).setOrigin(0.5);
+
+        // this.cameras.main.setBackgroundColor('#0b1023');
+
+        this.add.image(455, 270, 'menu');
+
+        this.add.text(width/2, 60, 'Set Your Focus Session', {
+          fontSize: '28px', color: '#e5e7eb'
+        }).setOrigin(0.5);
+
+        if (this.presetDuration && this.presetDuration > 0) {
+          this.startSession(this.presetDuration);
+          return;
+        }
+        
+            // ---- DOM form (minutes input) ----
+        const formHtml = `
+          <form id="session-form" style="
+            display:flex; gap:12px; align-items:center; 
+            background:#111827; padding:16px 20px; border-radius:12px;
+            box-shadow:0 6px 24px rgba(0,0,0,0.35); color:#e5e7eb; 
+            font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+          ">
+            <label for="minutes" style="font-size:16px;">Minutes:</label>
+            <input id="minutes" type="number" min="1" max="180" value="25" 
+                  style="width:80px; padding:8px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:#e5e7eb;" />
+            <button type="submit" style="
+              padding:8px 14px; border-radius:10px; border:1px solid #38bdf8; 
+              background:#0b132b; color:#e5e7eb; cursor:pointer;">Start</button>
+            <span id="error" style="color:#f59e0b; margin-left:8px; font-size:14px;"></span>
+          </form>
+        `;
+
+        this.form = this.add.dom(width/2, height/2).createFromHTML(formHtml);
+
+        const formEl = this.form.getChildByID('session-form');
+        const minutesEl = this.form.getChildByID('minutes');
+        const errorEl = this.form.getChildByID('error');
+
+        // Autofocus for quick entry
+        setTimeout(() => minutesEl?.focus?.(), 0);
+
+        formEl.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const minutes = parseInt(minutesEl.value, 10);
+          if (Number.isNaN(minutes) || minutes <= 0) {
+            errorEl.textContent = 'Enter a positive number.';
+            return;
+          }
+          if (minutes > 180) {
+            errorEl.textContent = 'Max 180 minutes.';
+            return;
+          }
+          // Hide form and start
+          this.form.setVisible(false);
+          this.startSession(minutes * 60);
+        });
+
 
         // Pause / Return to Menu
-        const hint = this.add.text(width/2, height*0.9, 'Esc = Pause / Menu', { fontSize: '16px', color: '#38bdf8' }).setOrigin(0.5);
+        const hint = this.add.text(width/2, height*0.9, 'Esc = Pause / Menu', { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
         this.input.keyboard.on('keydown-ESC', () => this.scene.start('Menu'));
       }
+
+      startSession(durationSec){
+        const { width, height } = this.scale;
+        this.timeRemaining = durationSec;
+
+        // Timer UI
+        this.timerText = this.add.text(width/2, 110, this.formatTime(this.timeRemaining), {
+          fontSize: '24px', color: '#38bdf8'
+        }).setOrigin(0.5);
+
+            // Tick every second
+        this.timerEvent = this.time.addEvent({
+          delay: 1000,
+          loop: true,
+          callback: () => {
+            this.timeRemaining -= 1;
+            this.timerText.setText(this.formatTime(this.timeRemaining));
+            if (this.timeRemaining <= 0) {
+              this.timerEvent.remove(false);
+              this.onSessionComplete();
+            }
+
+          }
+        });
+      }
+
+      formatTime(s){
+        const m = Math.floor(s / 60);
+        const ss = (s % 60).toString().padStart(2,'0');
+        return `${m}:${ss}`;
+      }
+
+      onSessionComplete(){
+        const { width, height } = this.scale;
+        this.add.text(width/2, height*0.75, 'Session Complete! 🎉', {
+          fontSize: '28px', color: '#f59e0b'
+        }).setOrigin(0.5);
+
+      } 
     }
+
+
 
     // --- Game Config --------------------------------------------------------
     const config = {
@@ -172,9 +361,10 @@
         width: 960,
         height: 540
       },
-      scene: [BootScene, MenuScene, GameScene, SettingsScene],
+      scene: [BootScene, BobbingScene, MenuScene, GameScene, SettingsScene],
       physics: { default: 'arcade', arcade: { debug: false } },
-      audio: { disableWebAudio: false }
+      audio: { disableWebAudio: false },
+      dom: { createContainer: true }
     };
 
     const game = new Phaser.Game(config);
