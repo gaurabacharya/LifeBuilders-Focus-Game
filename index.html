@@ -200,13 +200,14 @@
         makeButton('Settings', height*0.38 + 84, () => this.scene.start('Settings'));
 
         // Quick instructions (reduced cognitive load)
-        this.add.text(width/2, height*0.96, 'Enter/Space to Start • Esc to Pause • M to Mute', {
+        this.add.text(width/2, height*0.96, 'Enter/Space to Start • Esc to Pause • M to Mute • R to restart', {
           fontSize: '16px', color: '#000000'
         }).setOrigin(0.5);
 
         // Keyboard shortcuts
         this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Game'));
         this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Game'));
+        this.input.keyboard.on('keydown-R', () => this.scene.start('Bobbing'))
       }
     }
 
